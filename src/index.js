@@ -177,28 +177,38 @@ const check = opts =>
     widget(
         opts.name,
         opts.validator,
-        ({ value, error, disabled, SetAndValidate }) =>
+        (
+            { value, error, disabled, SetAndValidate },
+            myval = opts.value || 'on'
+        ) =>
             h('input', {
                 ...opts,
                 type: 'checkbox',
                 class: [opts.class, { error }],
                 disabled,
                 checked: Array.isArray(value)
-                    ? value.indexOf(opts.value || 'on') >= 0
-                    : value === (opts.value || 'on'),
+                    ? value.indexOf(myval) >= 0
+                    : value === myval,
                 name: opts.name,
-                value: opts.value || 'on',
+                value: myval,
                 onchange: [
                     SetAndValidate,
-                    ev =>
-                        ev.target.checked
-                            ? Array.isArray(value)
-                                ? [...value, opts.value || 'on']
-                                : !!value
-                                ? [value, opts.value || 'on']
-                                : opts.value || 'on'
-                            : Array.isArray(value)
-                            ? value.filter(x => x !== (opts.value || 'on'))
+                    (
+                        ev,
+                        nval = [
+                            ...(!value
+                                ? []
+                                : Array.isArray(value)
+                                ? value
+                                : [value]
+                            ).filter(x => x !== myval),
+                            ...(ev.target.checked ? [myval] : []),
+                        ]
+                    ) =>
+                        nval.length > 1
+                            ? nval
+                            : nval.length == 1
+                            ? nval[0]
                             : '',
                 ],
             })
