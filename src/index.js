@@ -1,4 +1,5 @@
-import { h } from 'hyperapp'
+let h // require this to be bound before anything can be used
+const bind = _h => (h = _h)
 
 const preventDefault = (f => e => [f, { e }])((_, { e }) => e.preventDefault())
 
@@ -149,7 +150,7 @@ const text = opts =>
                 type: opts.type || 'text',
                 class: [opts.class, { error: !!error }],
                 disabled,
-                name: name,
+                name: opts.name,
                 value: value,
                 oninput: [error ? SetAndValidate : Set, ev => ev.target.value],
                 ...(value === undefined ? {} : { onblur: Validate }),
@@ -230,6 +231,14 @@ const select = (opts, options) =>
                 'select',
                 {
                     ...opts,
+                    /*
+                    TODO: this only solves the problem when options
+                    don't change. What if they do?
+                    
+                    probably should process the options passed in, 
+                    and modify them adding 'selected' attribute
+                    on the vnode rather than real nodes.
+                    */
                     appendChild(child) {
                         if (value === child.value)
                             child.setAttribute('selected', 'selected')
@@ -273,4 +282,16 @@ const init = (values = {}, errors = {}) => ({
     submitted: false,
 })
 
-export { init, form, input, check, radio, submit, error, select, text, widget }
+export {
+    init,
+    form,
+    input,
+    check,
+    radio,
+    submit,
+    error,
+    select,
+    text,
+    widget,
+    bind,
+}
