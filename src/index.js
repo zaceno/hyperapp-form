@@ -1,22 +1,36 @@
-let h // require this to be bound before anything can be used
-const bind = _h => (h = _h)
+import { h } from 'hyperapp'
+
+const makeContext = (() => {
+    const text = txt => ({ name: txt, type: 3, children: [], props: {} })
+    return () => {
+        const provide = (context, node) => {
+            if (Array.isArray(node)) return node.map(n => provide(context, n))
+            if (!node.f)
+                return { ...node, children: provide(context, node.children) }
+            if (!node.provider || node.provider !== provide) return node
+            node = node.f(context)
+            if (!node.props) return text(node)
+            return node
+        }
+        const consume = f => ({ f, provider: provide })
+
+        return { consume, provide }
+    }
+})()
+const context = makeContext()
 
 const preventDefault = (f => e => [f, { e }])((_, { e }) => e.preventDefault())
 
 const dispatch = (f => (a, p) => [f, { a, p }])((d, { a, p }) => d(a, p))
+const batch = (...actions) => (x, p) => [x, ...actions.map(a => dispatch(a, p))]
 
-const HandleSubmit = (
+const Submit = (
     appState,
-    { event, onsubmit, validators, getFormState, setFormState }
+    { event, onsubmit, validate, getFormState, setFormState }
 ) => {
     let state = getFormState(appState)
     if (state.submitted) return appState // submitted forms cannot be resubmitted
-    let errors = Object.fromEntries(
-        Object.entries(validators).map(([name, validator]) => [
-            name,
-            validator(state.values[name], state.values),
-        ])
-    )
+    let errors = validate(state.values)
     let valid = Object.entries(errors).reduce(
         (ok, [_, error]) => ok && !error,
         true
@@ -28,132 +42,77 @@ const HandleSubmit = (
     ]
 }
 
-const Set = (
-    appState,
-    { name, value, getFormState, setFormState },
-    state = getFormState(appState)
-) =>
+const _Set = (appState, opts, name, state = opts.getFormState(appState)) =>
     state.submitted
         ? appState
-        : setFormState(appState, {
-              ...state,
-              values: {
-                  ...state.values,
-                  [name]: value,
-              },
-          })
+        : [opts.setFormState, { ...state, [name]: opts[name] }]
+const SetValues = (state, opts) => _Set(state, opts, 'values')
+const SetErrors = (state, opts) => _Set(state, opts, 'errors')
 
-const Validate = (
-    appState,
-    { name, validators, getFormState, setFormState },
-    state = getFormState(appState)
-) =>
-    state.submitted
-        ? appState
-        : setFormState(appState, {
-              ...state,
-              errors: {
-                  ...state.errors,
-                  [name]: validators[name]
-                      ? validators[name](state.values[name], state.values)
-                      : '',
-              },
-          })
-
-const SetAndValidate = (state, data) => [
-    state,
-    dispatch(Set, data),
-    dispatch(Validate, data),
-]
-
-const provideFormContext = (context, node) => {
-    if (Array.isArray(node))
-        return node.map(n => provideFormContext(context, n))
-    if (!node.f)
-        return { ...node, children: provideFormContext(context, node.children) }
-    if (!node.provider || node.provider !== provideFormContext) return node
-    node = node.f(context)
-    if (!node.props) return { name: node, type: 3, children: [], props: {} }
-    return node
-}
-
-const withFormContext = f => ({ f, provider: provideFormContext })
-
-const form = ({ appState, getFormState, setFormState, onsubmit }, content) => {
+const form = ({ state, getFormState, setFormState, onsubmit }, content) => {
     let validators = {}
+    const register = (name, validator) =>
+        validator && (validators[name] = validator)
+    const validate = values =>
+        Object.fromEntries(
+            Object.entries(validators).map(([name, f]) => [name, f(values)])
+        )
+    const withFormState = opts => ({ ...opts, setFormState, getFormState })
     return h(
         'form',
         {
             onsubmit: [
-                HandleSubmit,
-                event => ({
-                    event,
-                    onsubmit,
-                    validators,
-                    getFormState,
-                    setFormState,
-                }),
+                Submit,
+                event => withFormState({ event, onsubmit, validate }),
             ],
         },
-        provideFormContext(
+        context.provide(
             {
-                validators,
-                state: getFormState(appState),
-                getFormState,
-                setFormState,
+                ...state,
+                register,
+                SetValues: [SetValues, values => withFormState({ values })],
+                SetErrors: [SetErrors, errors => withFormState({ errors })],
             },
             content
         )
     )
 }
+
 const widget = (name, validator, f) =>
-    withFormContext(({ state, validators, getFormState, setFormState }) => {
-        if (validator) validators[name] = validator
-        return f({
-            value: state.values[name],
-            error: state.errors[name],
-            disabled: state.submitted,
-            Set: [
+    context.consume(
+        ({ values, errors, submitted, register, SetValues, SetErrors }) => {
+            register(name, values => validator(values[name], values))
+            const Set = [SetValues, x => ({ ...values, [name]: x })]
+            const Validate = [
+                SetErrors,
+                x => ({ ...errors, [name]: validator(x, values) }),
+            ]
+            return f({
+                disabled: submitted,
+                value: values[name],
+                error: errors[name],
                 Set,
-                value => ({
-                    getFormState,
-                    setFormState,
-                    name,
-                    value,
-                    validators,
-                }),
-            ],
-            Validate: [
-                Validate,
-                { name, getFormState, setFormState, validators },
-            ],
-            SetAndValidate: [
-                SetAndValidate,
-                value => ({
-                    name,
-                    value,
-                    validators,
-                    getFormState,
-                    setFormState,
-                }),
-            ],
-        })
-    })
+                Validate: [Validate, values[name]],
+            })
+        }
+    )
 
 const text = opts =>
     widget(
         opts.name,
         opts.validator,
-        ({ value, error, disabled, Set, Validate, SetAndValidate }) =>
+        ({ value, error, disabled, Set, Validate }) =>
             h('input', {
                 ...opts,
+                disabled,
                 type: opts.type || 'text',
                 class: [opts.class, { error: !!error }],
-                disabled,
-                name: opts.name,
                 value: value,
-                oninput: [error ? SetAndValidate : Set, ev => ev.target.value],
-                ...(value === undefined ? {} : { onblur: Validate }),
+                oninput: [
+                    error ? batch(Set, Validate) : Set,
+                    ev => ev.target.value,
+                ],
+                ...(value === undefined ? {} : { onblur: [Validate, value] }),
             })
     )
 
@@ -161,16 +120,15 @@ const radio = opts =>
     widget(
         opts.name,
         opts.validator,
-        ({ value, error, disabled, SetAndValidate }) =>
+        ({ value, error, disabled, Set, Validate }) =>
             h('input', {
                 ...opts,
                 type: 'radio',
                 class: [opts.class, { error }],
-                name: opts.name,
                 value: opts.value || 'on',
                 disabled,
                 checked: value === (opts.value || 'on'),
-                onchange: [SetAndValidate, opts.value || 'on'],
+                onchange: [batch(Set, Validate), opts.value || 'on'],
             })
     )
 
@@ -179,7 +137,7 @@ const check = opts =>
         opts.name,
         opts.validator,
         (
-            { value, error, disabled, SetAndValidate },
+            { value, error, disabled, Set, Validate },
             myval = opts.value || 'on'
         ) =>
             h('input', {
@@ -193,7 +151,7 @@ const check = opts =>
                 name: opts.name,
                 value: myval,
                 onchange: [
-                    SetAndValidate,
+                    batch(Set, Validate),
                     (
                         ev,
                         nval = [
@@ -226,7 +184,7 @@ const select = (opts, options) =>
     widget(
         opts.name,
         opts.validator,
-        ({ value, error, disabled, SetAndValidate }) =>
+        ({ value, error, disabled, Set, Validate }) =>
             h(
                 'select',
                 {
@@ -249,31 +207,28 @@ const select = (opts, options) =>
                     name: opts.name,
                     value,
                     disabled,
-                    oninput: [SetAndValidate, ev => ev.target.value],
+                    oninput: [batch(Set, Validate), ev => ev.target.value],
                 },
                 options
             )
     )
 
 const submit = (opts, content) =>
-    withFormContext(({ state }) =>
+    context.consume(({ submitted }) =>
         h(
             'button',
             {
                 ...opts,
                 type: 'submit',
-                disabled: state.submitted,
+                disabled: submitted,
             },
             content
         )
     )
 
 const error = () =>
-    withFormContext(({ state }) =>
-        Object.entries(state.errors).reduce(
-            (str, [name, error]) => str || error,
-            ''
-        )
+    context.consume(({ errors }) =>
+        Object.entries(errors).reduce((str, [name, error]) => str || error, '')
     )
 
 const init = (values = {}, errors = {}) => ({
@@ -293,5 +248,6 @@ export {
     select,
     text,
     widget,
-    bind,
+    context,
+    batch,
 }
