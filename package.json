@@ -1,6 +1,6 @@
 {
     "name": "@zxlabs/hyperapp-form",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "utility for forms and form-validation in hyperapp",
     "main": "src/index.js",
     "scripts": {
