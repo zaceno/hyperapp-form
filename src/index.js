@@ -81,18 +81,21 @@ const form = ({ state, getFormState, setFormState, onsubmit }, content) => {
 const widget = (name, validator, f) =>
     context.consume(
         ({ values, errors, submitted, register, SetValues, SetErrors }) => {
-            register(name, values => validator(values[name], values))
+            validator &&
+                register(name, values => validator(values[name], values))
             const Set = [SetValues, x => ({ ...values, [name]: x })]
-            const Validate = [
-                SetErrors,
-                x => ({ ...errors, [name]: validator(x, values) }),
-            ]
+            const Validate = validator
+                ? [
+                      SetErrors,
+                      x => ({ ...errors, [name]: validator(x, values) }),
+                  ]
+                : x => x //noop
             return f({
                 disabled: submitted,
                 value: values[name],
                 error: errors[name],
                 Set,
-                Validate: [Validate, values[name]],
+                Validate,
             })
         }
     )
