@@ -1,12 +1,9 @@
 {
     "name": "@zxlabs/hyperapp-form",
-    "version": "0.0.6",
+    "version": "0.0.5",
     "description": "utility for forms and form-validation in hyperapp",
     "main": "src/index.js",
     "scripts": {
-        "bundle": "rollup -i src/index.js -o dist/hyperappform.js --no-strict --no-esModule -mf iife -n hyperappform",
-        "minify": "terser dist/hyperappform.js -o dist/hyperappform.js -mc --source-map includeSources,url=hyperappform.js.map",
-        "build": "npm run bundle && npm run minify",
         "test": "ava"
     },
     "repository": {
