@@ -3,6 +3,7 @@
     "version": "0.0.8",
     "description": "utility for forms and form-validation in hyperapp",
     "main": "src/index.js",
+    "module": "src/index.js",
     "scripts": {
         "test": "ava"
     },
