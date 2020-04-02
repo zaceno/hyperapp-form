@@ -1,8 +1,7 @@
 import test from 'ava'
-import * as form from '../src'
+import * as form from '../src/'
 import 'undom/register'
 import { app, h } from 'hyperapp'
-form.bind(h)
 
 const step = ((
     _step = (f, n, g = x => setTimeout((y = f(x)) => n && n(y), 0)) => (
@@ -34,7 +33,7 @@ test.cb('text-input: onblur: validate field', t => {
                     form.form,
                     {
                         id: 'form',
-                        appState: state,
+                        state: state.form,
                         getFormState: s => s.form,
                         setFormState: (s, form) => ({ ...s, form }),
                         onsubmit: s => s,
@@ -109,7 +108,7 @@ test.cb('checkboxes', t => {
                     form.form,
                     {
                         id: 'form',
-                        appState: state,
+                        state: state.form,
                         getFormState: s => s.form,
                         setFormState: (s, form) => ({ ...s, form }),
                         onsubmit: x => x,
@@ -193,7 +192,7 @@ test.cb('radios', t => {
                     form.form,
                     {
                         id: 'form',
-                        appState: state,
+                        state: state.form,
                         getFormState: s => s.form,
                         setFormState: (s, form) => ({ ...s, form }),
                         onsubmit: x => x,
@@ -258,7 +257,7 @@ test.cb('custom widgets', t => {
                     form.form,
                     {
                         id: 'form',
-                        appState: state,
+                        state: state.form,
                         getFormState: s => s.form,
                         setFormState: (s, form) => ({ ...s, form }),
                         onsubmit: x => x,
@@ -268,14 +267,14 @@ test.cb('custom widgets', t => {
                             form.widget(
                                 'aaa',
                                 validator,
-                                ({ error, Set, Validate }) =>
+                                ({ error, value, Set, Validate }) =>
                                     h('span', {
                                         id: 'widget-a',
                                         class: {
                                             error: error === errorMessage,
                                         },
                                         onset: [Set, 'invalid'],
-                                        onvalidate: Validate,
+                                        onvalidate: [Validate, value],
                                     })
                             ),
                         ]),
@@ -283,13 +282,16 @@ test.cb('custom widgets', t => {
                             form.widget(
                                 'bbb',
                                 validator,
-                                ({ error, SetAndValidate }) =>
+                                ({ error, Set, Validate }) =>
                                     h('span', {
                                         id: 'widget-b',
                                         class: {
                                             error: error === errorMessage,
                                         },
-                                        onboth: [SetAndValidate, 'invalid'],
+                                        onboth: [
+                                            form.batch(Set, Validate),
+                                            'invalid',
+                                        ],
                                     })
                             ),
                         ]),

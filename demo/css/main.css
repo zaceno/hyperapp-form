@@ -1,0 +1,113 @@
+@import './form.css';
+
+* {
+    margin: 0;
+    padding: 0;
+}
+html,
+body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+/* General typography */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+}
+p {
+    margin: 25px 0;
+}
+
+/* Layout */
+body > nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 159px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: hsl(223deg, 7%, 49%);
+    border-right: 1px #1e1e1e solid;
+    padding: 20px;
+}
+
+body > nav > h1 {
+    font-size: 18px;
+    font-weight: normal;
+    color: #999;
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.4);
+    margin: 20px 0 10px 0;
+}
+
+body > nav a {
+    font-size: 14px;
+    color: #000;
+    text-decoration: none;
+}
+body > nav li {
+    color: #000;
+    height: 22px;
+    list-style-type: none;
+}
+body > nav li.current {
+    color: #fff;
+}
+body > nav li:before {
+    content: '\2606\00a0\00a0';
+}
+body > nav li.current:before {
+    content: '\2605\00a0\00a0';
+}
+body > nav li.current a {
+    color: #fff;
+}
+
+body > main#run {
+    position: absolute;
+    top: 0;
+    left: 200px;
+    bottom: 0;
+    right: 500px;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    padding: 20px 50px;
+    background: rgba(117, 73, 135, 1);
+}
+
+body > main#run > section {
+    background-color: #fff;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body > main#run > section + section {
+    margin-top: 20px;
+}
+
+body > section#code {
+    position: absolute;
+    background-color: #1e1e1e; /* match to highlighter theme */
+    top: 0;
+    width: 500px;
+    right: 0;
+    bottom: 0;
+    overflow: scroll;
+    box-shadow: -2px 0px 8px rgba(0, 0, 0, 0.2);
+}
+
+body main section > h1 {
+    font-weight: normal;
+    font-size: 12px;
+    height: 18px;
+    line-height: 18px;
+    border-bottom: 1px #ddd solid;
+    margin-top: -12px;
+    margin-bottom: 18px;
+    color: #999;
+}

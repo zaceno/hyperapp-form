@@ -1,28 +1,23 @@
 import { h } from 'hyperapp'
 
-const makeContext = (() => {
-    const text = txt => ({ name: txt, type: 3, children: [], props: {} })
-    return () => {
-        const provide = (context, node) => {
-            if (Array.isArray(node)) return node.map(n => provide(context, n))
-            if (!node.f)
-                return { ...node, children: provide(context, node.children) }
-            if (!node.provider || node.provider !== provide) return node
-            node = node.f(context)
-            if (!node.props) return text(node)
-            return node
-        }
-        const consume = f => ({ f, provider: provide })
+const provide = (props, node) =>
+    Array.isArray(node)
+        ? node.map((n) => provide(props, n)).flat()
+        : typeof node === 'function'
+        ? provide(props, node(props))
+        : typeof node.name === 'function'
+        ? provide(props, node.name(props))
+        : { ...node, children: provide(props, node.children) }
 
-        return { consume, provide }
-    }
-})()
-const context = makeContext()
+const preventDefault = ((f) => (e) => [f, { e }])((_, { e }) =>
+    e.preventDefault()
+)
 
-const preventDefault = (f => e => [f, { e }])((_, { e }) => e.preventDefault())
-
-const dispatch = (f => (a, p) => [f, { a, p }])((d, { a, p }) => d(a, p))
-const batch = (...actions) => (x, p) => [x, ...actions.map(a => dispatch(a, p))]
+const dispatch = ((f) => (a, p) => [f, { a, p }])((d, { a, p }) => d(a, p))
+const batch = (...actions) => (x, p) => [
+    x,
+    ...actions.map((a) => dispatch(a, p)),
+]
 
 const Submit = (
     appState,
@@ -50,57 +45,59 @@ const SetValues = (state, opts) => _Set(state, opts, 'values')
 const SetErrors = (state, opts) => _Set(state, opts, 'errors')
 
 const form = ({ state, getFormState, setFormState, onsubmit }, content) => {
-    let validators = {}
-    const register = (name, validator) =>
-        validator && (validators[name] = validator)
-    const validate = values =>
-        Object.fromEntries(
-            Object.entries(validators).map(([name, f]) => [name, f(values)])
-        )
-    const withFormState = opts => ({ ...opts, setFormState, getFormState })
+    const validators = []
+    const validate = (values) =>
+        validators.reduce((errors, validator) => validator(errors, values), {})
+    const register = (f) => validators.push(f)
+    const withFormState = (opts) => ({ ...opts, setFormState, getFormState })
     return h(
         'form',
         {
             onsubmit: [
                 Submit,
-                event => withFormState({ event, onsubmit, validate }),
+                (event) => withFormState({ event, onsubmit, validate }),
             ],
         },
-        context.provide(
+        provide(
             {
                 ...state,
                 register,
-                SetValues: [SetValues, values => withFormState({ values })],
-                SetErrors: [SetErrors, errors => withFormState({ errors })],
+                SetValues: [SetValues, (values) => withFormState({ values })],
+                SetErrors: [SetErrors, (errors) => withFormState({ errors })],
             },
             content
         )
     )
 }
 
-const widget = (name, validator, f) =>
-    context.consume(
-        ({ values, errors, submitted, register, SetValues, SetErrors }) => {
-            validator &&
-                register(name, values => validator(values[name], values))
-            const Set = [SetValues, x => ({ ...values, [name]: x })]
-            const Validate = validator
-                ? [
-                      SetErrors,
-                      x => ({ ...errors, [name]: validator(x, values) }),
-                  ]
-                : x => x //noop
-            return f({
-                disabled: submitted,
-                value: values[name],
-                error: errors[name],
-                Set,
-                Validate,
-            })
-        }
-    )
+const widget = (name, validator, f) => ({
+    values,
+    errors,
+    submitted,
+    register,
+    SetValues,
+    SetErrors,
+}) => {
+    validator &&
+        register((errors, values) => {
+            let msg = validator(values[name], values)
+            if (msg.length) return { ...errors, [name]: msg }
+            else return errors
+        })
+    const Set = [SetValues, (x) => ({ ...values, [name]: x })]
+    const Validate = validator
+        ? [SetErrors, (x) => ({ ...errors, [name]: validator(x, values) })]
+        : (x) => x //noop
+    return f({
+        disabled: submitted,
+        value: values[name],
+        error: errors[name],
+        Set,
+        Validate,
+    })
+}
 
-const text = opts =>
+const text = (opts) =>
     widget(
         opts.name,
         opts.validator,
@@ -113,13 +110,13 @@ const text = opts =>
                 value: value,
                 oninput: [
                     error ? batch(Set, Validate) : Set,
-                    ev => ev.target.value,
+                    (ev) => ev.target.value,
                 ],
                 ...(value === undefined ? {} : { onblur: [Validate, value] }),
             })
     )
 
-const radio = opts =>
+const radio = (opts) =>
     widget(
         opts.name,
         opts.validator,
@@ -135,7 +132,7 @@ const radio = opts =>
             })
     )
 
-const check = opts =>
+const check = (opts) =>
     widget(
         opts.name,
         opts.validator,
@@ -163,7 +160,7 @@ const check = opts =>
                                 : Array.isArray(value)
                                 ? value
                                 : [value]
-                            ).filter(x => x !== myval),
+                            ).filter((x) => x !== myval),
                             ...(ev.target.checked ? [myval] : []),
                         ]
                     ) =>
@@ -176,7 +173,7 @@ const check = opts =>
             })
     )
 
-const input = props =>
+const input = (props) =>
     props.type === 'checkbox'
         ? check(props)
         : props.type === 'radio'
@@ -210,29 +207,33 @@ const select = (opts, options) =>
                     name: opts.name,
                     value,
                     disabled,
-                    oninput: [batch(Set, Validate), ev => ev.target.value],
+                    oninput: [batch(Set, Validate), (ev) => ev.target.value],
                 },
                 options
             )
     )
 
-const submit = (opts, content) =>
-    context.consume(({ submitted }) =>
-        h(
-            'button',
-            {
-                ...opts,
-                type: 'submit',
-                disabled: submitted,
-            },
-            content
-        )
+const button = (opts, content) => ({ submitted }) =>
+    h(
+        'button',
+        {
+            ...opts,
+            type: opts.type || 'button',
+            disabled: submitted,
+        },
+        content
     )
 
-const error = () =>
-    context.consume(({ errors }) =>
-        Object.entries(errors).reduce((str, [name, error]) => str || error, '')
+const submit = (opts, content) =>
+    button({ ...opts, type: 'submit' }, content || 'Submit')
+
+const error = (props) => ({ errors }) => {
+    let msg = Object.entries(errors).reduce(
+        (str, [name, error]) => str || error,
+        ''
     )
+    return h('p', { ...props, class: 'error', hidden: !msg }, msg)
+}
 
 const init = (values = {}, errors = {}) => ({
     values,
@@ -244,13 +245,11 @@ export {
     init,
     form,
     input,
-    check,
-    radio,
-    submit,
     error,
     select,
-    text,
     widget,
-    context,
     batch,
+    button,
+    submit,
+    provide,
 }
