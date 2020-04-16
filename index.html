@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+
+        <!-- stop browser from asking for a favicon: -->
+        <link rel="icon" href="data:," />
+
+        <!-- code highlighting engine: -->
+        <link href="./css/prism.css" rel="stylesheet" />
+        <script src="./js/prism.js"></script>
+
+        <!-- style -->
+        <link href="./css/main.css" rel="stylesheet" />
+
+        <!-- script environment -->
+        <script
+            defer
+            src="./lib/es-module-shims.js"
+        ></script>
+        <script type="importmap-shim">
+            {"imports": {
+                "hyperapp": "./lib/hyperapp.js",
+                "htm": "./lib/htm.js",
+                "html": "./js/html.js",
+                "form": "./lib/form.js"
+            }}
+        </script>
+        <script type="module-shim" src="./js/run.js"></script>
+        <script type="module-shim" src="./js/code.js"></script>
+        <script>
+            /*
+            Code that simply adds class="current" to the nav link list
+            item for the current hash
+            */
+            const setCurrent = () => {
+                let current = document.querySelector('li.current')
+                if (current) current.classList.remove('current')
+                current = document.querySelector(
+                    'a[href*="' + window.location.hash + '"]'
+                )
+                if (current) current.parentNode.classList.add('current')
+            }
+            document.addEventListener('DOMContentLoaded', setCurrent)
+            window.addEventListener('hashchange', setCurrent)
+        </script>
+    </head>
+    <body>
+        <nav>
+            <h1>Flow</h1>
+            <ul>
+                <li>
+                    <a href="#flow/submitting">Submitting</a>
+                </li>
+                <li>
+                    <a href="#flow/validating">Validating</a>
+                </li>
+                <li>
+                    <a href="#flow/initvals">Initial Values</a>
+                </li>
+                <li>
+                    <a href="#flow/initerrors">Initial Errors</a>
+                </li>
+            </ul>
+            <h1>Components</h1>
+            <ul>
+                <li>
+                    <a href="#components/select">Select</a>
+                </li>
+                <li>
+                    <a href="#components/radios">Radios</a>
+                </li>
+                <li>
+                    <a href="#components/checkboxes">Checkboxes</a>
+                </li>
+            </ul>
+            <h1>Examples</h1>
+            <ul>
+                <li>
+                    <a href="#examples/register">Registration</a>
+                </li>
+                <li>
+                    <a href="#examples/login">Log in</a>
+                </li>
+                <li>
+                    <a href="#examples/profile">Profile</a>
+                </li>
+            </ul>
+            <h1>Advanced</h1>
+            <ul>
+                <li>
+                    <a href="#advanced/custominput">Custom input</a>
+                </li>
+                <li>
+                    <a href="#advanced/custominfo">Custom info</a>
+                </li>
+                <li>
+                    <a href="#advanced/custombehavior">Custom behavior</a>
+                </li>
+                <li>
+                    <a href="#advanced/dyngroups">Dynamic groups</a>
+                </li>
+            </ul>
+        </nav>
+        <main id="run"></main>
+        <section id="code"></section>
+    </body>
+</html>
