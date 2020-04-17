@@ -30,7 +30,7 @@ const objMerge = (prefix, original, news) => ({
 // filterKey({fooA:1, fooB: 2, barC: 3, barD: 4}) --> {A: 1, B:2}
 const objExtract = (prefix, obj) =>
     Object.keys(obj)
-        .filter((k) => k.startsWith(prefix))
+        .filter(k => k.startsWith(prefix))
         .reduce(
             (result, key) => (
                 (result[key.replace(prefix, '')] = obj[key]), result
@@ -41,14 +41,14 @@ const objExtract = (prefix, obj) =>
 //removes all keys from an object starting with prefix
 const objPurge = (prefix, obj) =>
     Object.keys(obj)
-        .filter((k) => !k.startsWith(prefix))
+        .filter(k => !k.startsWith(prefix))
         .reduce((result, key) => ((result[key] = obj[key]), result), {})
 
 // -- DEFINITION OF EXPENSE-ROW CONTEXT --
 
 const SetExpenseValue = (ctx, index) => [
     ctx.SetValues,
-    (newExpense) => ({
+    newExpense => ({
         ...ctx.values,
         expenses: ctx.values.expenses.map((x, i) =>
             i === index ? newExpense : x
@@ -57,10 +57,10 @@ const SetExpenseValue = (ctx, index) => [
 ]
 const SetExpenseError = (ctx, index) => [
     ctx.SetErrors,
-    (newErrors) => objMerge('expenses.' + index + '.', ctx.errors, newErrors),
+    newErrors => objMerge('expenses.' + index + '.', ctx.errors, newErrors),
 ]
 
-const AddExpense = (ctx) => [
+const AddExpense = ctx => [
     ctx.SetValues,
     {
         ...ctx.values,
@@ -109,10 +109,10 @@ const getExpenseContext = (ctx, index) => ({
 
 // -- COMPONENTS --
 
-const provideExpenseContext = ({ index }, content) => (ctx) =>
+const provideExpenseContext = ({ index }, content) => ctx =>
     form.provide(getExpenseContext(ctx, index), content)
 
-const addExpenseButton = () => (ctx) => html`
+const addExpenseButton = () => ctx => html`
     <${form.button} onclick=${AddExpense(ctx)}>Add<//>
 `
 
@@ -120,7 +120,7 @@ const removeExpenseButton = () => ({ Remove }) => html`
     <${form.button} onclick=${Remove}>Remove<//>
 `
 
-const expenseError = () => (ctx) =>
+const expenseError = () => ctx =>
     html`
         <span
             style=${{
@@ -132,22 +132,22 @@ const expenseError = () => (ctx) =>
         </span>
     `
 
-const totalExpenses = () => (ctx) => {
-    let total = (ctx.values.expenses || []).reduce((total, expense, index) => {
-        if (total === null) return null
-        if (
-            ctx.errors.expenses &&
-            ctx.errors.expenses[index] &&
-            ctx.errors.expenses[index].amount
-        )
-            return null
-        return total === null ? null : total + (+expense.amount || 0)
-    }, 0)
-    return html`<b>${total ? '' + total : ''}</b>`
-}
+const totalExpenses = () => ctx => html`
+    <b>
+        ${(ctx.values.expenses || []).reduce(
+            (total, expense, index) =>
+                total === ''
+                    ? ''
+                    : ctx.errors['expenses.' + index + '.amount']
+                    ? ''
+                    : total + (+expense.amount || 0),
+            0
+        )}
+    </b>
+`
 
 // -- FORM --
-const myForm = (opts) => html`<${form.form} ...${opts}>
+const myForm = opts => html`<${form.form} ...${opts}>
         <section>
             <h2>Expenses</h2>
             <${addExpenseButton} />
@@ -159,7 +159,7 @@ const myForm = (opts) => html`<${form.form} ...${opts}>
                     <th></th>
                     <th></th>
                 </tr>
-                ${(ctx) =>
+                ${ctx =>
                     !ctx.values.expenses
                         ? []
                         : ctx.values.expenses.map(
@@ -170,7 +170,7 @@ const myForm = (opts) => html`<${form.form} ...${opts}>
                         <td>
                             <${form.select}
                                 name="category"
-                                validator=${(x) =>
+                                validator=${x =>
                                     !x ? 'Category is required' : ''}
                             >
                                 <option value="">Select:</option>
@@ -185,7 +185,7 @@ const myForm = (opts) => html`<${form.form} ...${opts}>
                             <${form.input}
                                 name="amount"
                                 style=${{ width: '50px' }}
-                                validator=${(x) =>
+                                validator=${x =>
                                     isNaN(+x) || x <= 0
                                         ? 'Amount must be > 0'
                                         : ''}
@@ -227,7 +227,7 @@ const Edit = (state, formdata) => ({
 
 export const init = { form: form.init(), submitted: null }
 
-export const view = (state) => html`
+export const view = state => html`
     <main>
         <section>
             <h1>Controls</h1>
@@ -238,7 +238,7 @@ export const view = (state) => html`
             <h1>Expenses</h1>
             <${myForm}
                 state=${state.form}
-                getFormState=${(s) => s.form}
+                getFormState=${s => s.form}
                 setFormState=${(s, x) => ({ ...s, form: x })}
                 onsubmit=${Submit}
             />
