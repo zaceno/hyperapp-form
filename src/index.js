@@ -76,12 +76,11 @@ const widget = (name, validator, f) => ({
     SetValues,
     SetErrors,
 }) => {
-    validator &&
-        register((errors, values) => {
-            let msg = validator(values[name], values)
-            if (msg.length) return { ...errors, [name]: msg }
-            else return errors
-        })
+    if (validator)
+        register((errors, values) => ({
+            ...errors,
+            [name]: validator(values[name], values),
+        }))
     const Set = [SetValues, x => ({ ...values, [name]: x })]
     const Validate = validator
         ? [SetErrors, x => ({ ...errors, [name]: validator(x, values) })]
@@ -95,24 +94,30 @@ const widget = (name, validator, f) => ({
     })
 }
 
-const text = opts =>
-    widget(
-        opts.name,
-        opts.validator,
-        ({ value, error, disabled, Set, Validate }) =>
-            h('input', {
-                ...opts,
-                disabled,
-                type: opts.type || 'text',
-                class: [opts.class, { error: !!error }],
-                value: value,
-                oninput: [
-                    error ? batch(Set, Validate) : Set,
-                    ev => ev.target.value,
-                ],
-                ...(value === undefined ? {} : { onblur: [Validate, value] }),
-            })
-    )
+const input = opts =>
+    opts.type === 'checkbox'
+        ? check(opts)
+        : opts.type === 'radio'
+        ? radio(opts)
+        : widget(
+              opts.name,
+              opts.validator,
+              ({ value, error, disabled, Set, Validate }) =>
+                  h('input', {
+                      ...opts,
+                      disabled,
+                      type: opts.type || 'text',
+                      class: [opts.class, { error: !!error }],
+                      value: value,
+                      oninput: [
+                          error ? batch(Set, Validate) : Set,
+                          ev => ev.target.value,
+                      ],
+                      ...(value === undefined
+                          ? {}
+                          : { onblur: [Validate, value] }),
+                  })
+          )
 
 const radio = opts =>
     widget(
@@ -171,13 +176,6 @@ const check = opts =>
             })
     )
 
-const input = props =>
-    props.type === 'checkbox'
-        ? check(props)
-        : props.type === 'radio'
-        ? radio(props)
-        : text(props)
-
 const select = (opts, options) =>
     widget(
         opts.name,
@@ -187,27 +185,25 @@ const select = (opts, options) =>
                 'select',
                 {
                     ...opts,
-                    /*
-                    TODO: this only solves the problem when options
-                    don't change. What if they do?
-                    
-                    probably should process the options passed in, 
-                    and modify them adding 'selected' attribute
-                    on the vnode rather than real nodes.
-                    */
-                    appendChild(child) {
-                        if (value === child.value)
-                            child.setAttribute('selected', 'selected')
-                        return Element.prototype.appendChild.call(this, child)
-                    },
-
                     class: [opts.class, { error }],
                     name: opts.name,
                     value,
                     disabled,
                     oninput: [batch(Set, Validate), ev => ev.target.value],
                 },
-                options
+                options.map(o =>
+                    o.name === 'option' &&
+                    value &&
+                    (o.props.value === value || o.children[0].name === value)
+                        ? {
+                              ...o,
+                              props: {
+                                  ...o.props,
+                                  selected: true,
+                              },
+                          }
+                        : o
+                )
             )
     )
 
