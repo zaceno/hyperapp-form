@@ -7,4 +7,4 @@ alleviate some of this drudgery for developers using Hyperapp (v2)
 
 For now, it is published on npm as @zxlabs/hyperapp-form
 
-How to use it? See [this example on Codepen](https://codepen.io/zaceno/pen/mdJBPxm?editors=0010)
+How to use it? See the example gallery at [(https://zaceno.github.io/hyperapp-form](https://zaceno.github.io/hyperapp-form)
