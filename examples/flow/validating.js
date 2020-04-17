@@ -33,7 +33,7 @@ export const view = state => html`
                             validator=${validcode}
                         />
                     </label>
-                    <${form.submit}>Submit</${form.submit}>
+                    <${form.button} type="submit">Submit</${form.button}>
                 </p> 
 
                 <${form.error} />

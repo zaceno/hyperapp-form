@@ -117,7 +117,9 @@ const myForm = opts => html`
         </section>
         <${interests} />
         <${form.error} />
-        <${form.submit}>Save</${form.submit}>
+        <${form.button} type="submit">
+            Save
+        </${form.button}>
     </${form.form}>
 `
 

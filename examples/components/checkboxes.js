@@ -72,7 +72,9 @@ export const view = state => html`
                     </p>                    
                 </section>
 
-                <${form.submit}>Submit</${form.submit}>
+                <${form.button} type="submit">
+                    Submit
+                </${form.button}>
 
             </${form.form}>
         </section>

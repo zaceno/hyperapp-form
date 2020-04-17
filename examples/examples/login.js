@@ -87,7 +87,9 @@ const view = state => html`
                                 />
                             </label>
                         </p>
-                        <${form.submit}>Log in</${form.submit}>
+                        <${form.button} type="submit">
+                            Log in
+                        </${form.button}>
                     </${form.form}>
                 </section>
             `}

@@ -75,7 +75,9 @@ export const view = state => html`
             >
                 <${statusUpdate} name="status" maxlen="70" />
                 <${form.error} />
-                <${form.submit}>Post<//>
+                <${form.button} type="submit">
+                    Post
+                </${form.button}>
             </${form.form}>
        </section>
        <section>

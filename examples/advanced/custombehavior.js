@@ -11,7 +11,7 @@ export const init = {
     form: form.init({ min: 30, max: 40 }),
     submitted: null,
 }
-export const view = (state) => html`
+export const view = state => html`
     <main>
         <section>
             <h1>Control</h1>
@@ -21,17 +21,17 @@ export const view = (state) => html`
             <h1>Define a range</h1>
             <${form.form}
                 state=${state.form}
-                getFormState=${(s) => s.form}
+                getFormState=${s => s.form}
                 setFormState=${(s, x) => ({ ...s, form: x })}
                 onsubmit=${Submit}
             >
-            ${(ctx) =>
+            ${ctx =>
                 form.provide(
                     {
                         ...ctx,
                         SetValues: [
                             ctx.SetValues,
-                            (newVals) => ({
+                            newVals => ({
                                 ...newVals,
                                 max: Math.max(newVals.min, newVals.max),
                                 min: Math.min(newVals.min, newVals.max),
@@ -71,7 +71,9 @@ export const view = (state) => html`
                 <${form.error} />
 
                 <p style=${{ clear: 'left' }}>
-                    <${form.submit}>Submit</${form.submit}>
+                    <${form.button} type="submit">
+                        Submit
+                    </${form.button}>
                 </p>
 
 
