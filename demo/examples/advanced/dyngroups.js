@@ -210,7 +210,7 @@ const myForm = opts => html`<${form.form} ...${opts}>
             <h2>Total</h2>
             <${totalExpenses} />
         </section>
-        <${form.button} type="submit">Submit<//>
+        <${form.button} type="submit">Submit</${form.button}>
     </${form.form}>
 `
 

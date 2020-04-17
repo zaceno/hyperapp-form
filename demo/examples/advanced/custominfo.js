@@ -75,7 +75,9 @@ export const view = state => html`
                 </p>
 
                 <p style=${{ clear: 'left' }}>
-                    <${form.submit}>Submit</${form.submit}>
+                    <${form.button} type="submit">
+                        Submit
+                    </${form.button}>
                 </p>
             </${form.form}>
         </section>

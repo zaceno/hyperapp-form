@@ -122,7 +122,9 @@ const view = state => html`
                             </label>
                         </p>
                         <${form.error} />
-                        <${form.submit}>Submit</${form.submit}>
+                        <${form.button} type="submit">
+                            Submit
+                        </${form.button}>
                     </${form.form}>
                 </section>
             `}

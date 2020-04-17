@@ -75,7 +75,9 @@ export const view = state => html`
                 
                 <${form.error} />
 
-                <${form.submit}>Submit</${form.submit}>
+                <${form.button} type="submit">
+                    Submit
+                </${form.button}>
 
             </${form.form}>
         </section>
