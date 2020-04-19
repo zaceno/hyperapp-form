@@ -1,6 +1,6 @@
 import { h } from 'hyperapp'
 import widget from './widget.js'
-import { batch } from './utils.js'
+import batch from './batch.js'
 
 export default opts =>
     widget(

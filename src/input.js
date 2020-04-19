@@ -2,7 +2,7 @@ import { h } from 'hyperapp'
 import check from './check.js'
 import radio from './radio.js'
 import widget from './widget.js'
-import { batch } from './utils.js'
+import batch from './batch.js'
 
 export default opts =>
     opts.type === 'checkbox'
