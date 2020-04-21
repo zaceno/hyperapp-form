@@ -34,7 +34,7 @@ the form, make sure to initialize the form state using the `init` function. Typi
 initial state of your app, or in the action that causes the form to be rendered
 
 ```js
-const ShowForm = state => ({
+const ShowForm = (state) => ({
     ...state,
     page: 'form',
     form: form.init(),
@@ -47,12 +47,12 @@ When you render your form, rather than using a plain `<form></form>` tag pair, u
 component from this library instead.
 
 ```jsx
-state => (
+;(state) => (
     <main>
         <h1>My form:</h1>
         <form.form
             state={state.form}
-            getFormState={s => s.form}
+            getFormState={(s) => s.form}
             setFormState={(s, x) => ({ ...s, form: x })}
             onsubmit={HandleSubmittedForm}
         >
@@ -102,7 +102,114 @@ All that we've covered so far, is combined in a live runnable example you can tr
 Go there, type "foo" in the input field then click submit. Notice two things:
 
 -   After the form was submitted, the input and submit-button became disabled. A form, once submitted, cannot be submitted again. You must initialize the state to render the form editable once more (Use the "Reset" button in the example to do this).
-
 -   The data submitted was: `{foo: "bar"}`. "bar" is the text you typed, and `foo` is because you typed it in an input with `name="foo"`.
 
-... TBC ...
+### Validation On Submit
+
+Most often you want the data submitted from a form to conform to certain rules. If the entered data is not conformant, you don't want the submission to go through, but to leave the form editable, with hints so users can correct it.
+
+Visit [https://zaceno.github.io/hyperapp-form/#flow/validating](https://zaceno.github.io/hyperapp-form/#flow/validating) for an example.
+
+Try typing some letters in the input box, and hit enter. Notice:
+
+-   The form did not submit. (The submitted value is still null)
+-   The form is still editable.
+-   The error message "Code must be six digits" is displayed.
+-   The input gets a red border and color.
+
+This is all due to the `validator` prop on the input:
+
+```jsx
+<form.input type="text" name="code" validator={validcode} />
+```
+
+where the `validcode` validator is defined as:
+
+```js
+const validcode = (x) =>
+    !!x && x.match(/^\d{6}$/) ? '' : 'Code must be six digits'
+```
+
+When a form is submitted, each validator attached to a `form.input` is called with the value for that input. If any the validators return a string message (or any truthy value in fact), we will _not_ call the `onsubmit` handler, and we leave the form open.
+
+Moreover, each input whose validator returned an error message, will have "error" added to its class list.
+
+The error message is displayed thanks to this component:
+
+```jsx
+<form.error />
+```
+
+It returns a virtual node representing the html:
+
+```html
+<p class="error" hidden="???">Some error message</p>
+```
+
+If any of the validators returned a message, _one_ of those messages will be shown. The `p` tag is rendered always, but it is hidden until there is a message to show.
+
+### Validation while editing
+
+Validators also run as the user types in fields where there is an error. When the error is corrected, the "error" class is removed, and the error message dissapears.
+
+And even if a form is not submitted, when the user blurs a field containing a bad value, that field (not all) is validated. We validate on blur so as not to unnecessarily annoy users.
+
+The onblur validation only applies to text-style inputs (text, password, email et c). Others like radios, checkboxes, select-dropdowns are validated immediately when the value changes.
+
+Give it a try!
+
+### Forms with initial values
+
+Sometimes the form is meant for changing a bunch of values already existing on the server. So we want all pre-existing values set on
+the form from the beginning.
+
+You can see how to do that in this example: [https://zaceno.github.io/hyperapp-form/#flow/initvals](https://zaceno.github.io/hyperapp-form/#flow/initvals)
+
+Notice how we initialize the form with an object as the first argument:
+
+```js
+const init = {
+    submitted: null,
+    form: form.init({
+        foo: 'default value',
+        hidden: 'not editable',
+    }),
+}
+```
+
+You will notice that the input has the value "default value" from the start. That is because the name of the input is `"foo"`.
+
+You do not see the text "not editable" anywhere because there is no `form.input` with the name `"hidden"`. However, if you submit the form, you will see that both values were passed through to the onsubmit handler.
+
+### Forms with initial errors
+
+In the end, all the validation we do on the client side is just
+to help the user produce sensible data to send to a server. The real validation happens there, and sometimes it finds problems the client side can't check for.
+
+In those cases, we probably want to present the form again, with the values intact and an error message explaining what went wrong.
+
+See the example [https://zaceno.github.io/hyperapp-form/#flow/initerrors](https://zaceno.github.io/hyperapp-form/#flow/initerrors)
+
+The email input already has the "error" class from the start, and the error message is explaining that something went wrong server side. This, again, is because of how we initialized the form:
+
+```js
+const init = {
+    submitted: null,
+    form: form.init(
+        {
+            email: 'boo@example.com',
+        },
+        {
+            email: 'We could not verify your email, please double check it!',
+        }
+    ),
+}
+```
+
+As before, we are setting the "email" default value to an email address the user probably typed before. But we are also passing a second argument - these are the errors that the form should register from the start.
+
+These initial errors weill be cleared the first time a user validates the input or submits the form (when all inputs are validated).
+
+## More Components
+
+...TBC...
