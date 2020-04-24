@@ -1,19 +1,28 @@
 import html from 'html'
 import * as form from 'form'
 
+const validEmail = (x) =>
+    !x
+        ? 'E-mail address is required'
+        : !x.match(/^.+\@.+\..+$/)
+        ? 'E-mail address looks mistyped'
+        : ''
+
 const Reset = () => init
 const Submit = (state, formdata) => ({ ...state, submitted: formdata })
 
 export const init = {
     submitted: null,
     form: form.init(
-        {},
         {
-            password: 'The password is incorrect. Try again!',
+            email: 'boo@example.com',
+        },
+        {
+            email: 'We could not verify your email, please double check it!',
         }
     ),
 }
-export const view = state => html`
+export const view = (state) => html`
     <main>
  
        <section>
@@ -25,13 +34,17 @@ export const view = state => html`
             <h1>Submitting a form</h1>
             <${form.form}
                 state=${state.form}
-                getFormState=${s => s.form}
+                getFormState=${(s) => s.form}
                 setFormState=${(s, x) => ({ ...s, form: x })}
                 onsubmit=${Submit}
             >
                 <${form.error} />
     
-                <${form.input} type="password" name="password" />
+                <${form.input}
+                    type="text"
+                    name="email"
+                    validator=${validEmail}
+                />
 
                 <${form.button} type="submit">Submit</${form.button}>
             </${form.form}>
