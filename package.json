@@ -6,7 +6,10 @@
     "module": "src/index.js",
     "scripts": {
         "test": "ava",
-        "build:demo": "node build-demo-site.js"
+        "build:demo": "node build-demo-site.js",
+        "build:iief": "rollup src/index.js --external hyperapp -f iife -n hyperappform -g hyperapp:hyperapp |terser -m -c > dist/iife.js",
+        "build:mini": "rollup src/index.js --external hyperapp | terser -m -c > dist/mini.js",
+        "build:dist": "npm run build:iief && npm run build:mini"
     },
     "repository": {
         "type": "git",
@@ -33,7 +36,9 @@
         "esm": "^3.2.25",
         "htm": "^3.0.3",
         "hyperapp": "2.x",
+        "rollup": "^2.7.2",
         "servor": "^3.2.0",
+        "terser": "^4.6.12",
         "undom": "^0.4.0"
     },
     "ava": {
