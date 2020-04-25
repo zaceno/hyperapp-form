@@ -37,7 +37,7 @@ import * as form from '@zxlabs/hyperapp-form'
 The main version is implemented as a number of separate es-modules, for the benefit of tree shaking. If you prefer to import a single, minified version, you can:
 
 ```js
-import * as from from 'https://unpkg.com/@zxlabs/hyperapp-form/dist/mini.js'
+import * as form from 'https://unpkg.com/@zxlabs/hyperapp-form/dist/mini.js'
 ```
 
 ### IIFE version
@@ -48,7 +48,7 @@ So add a script after the hyperapp script like this:
 
 ```html
 <script src="https://unpkg.com/hyperapp/dist/hyperapp.js"></script>
-<script src="httos://unpkg.com/hyperapp-form/dist/iife.js"></script>
+<script src="httos://unpkg.com/@zxlabs/hyperapp-form/dist/iife.js"></script>
 ```
 
 that will inject an object in the global scope called `hyperappform`, holding all the components descriptbed below.
@@ -236,7 +236,7 @@ const init = {
 
 As before, we are setting the "email" default value to an email address the user probably typed before. But we are also passing a second argument - these are the errors that the form should register from the start.
 
-These initial errors weill be cleared the first time a user validates the input or submits the form (when all inputs are validated).
+These initial errors will be cleared the first time a user validates the input or submits the form (when all inputs are validated).
 
 ## More Components
 
