@@ -32,9 +32,9 @@ const statusUpdate = ({ name, maxlen }) =>
                         margin: '0',
                     }}
                     disabled=${disabled}
-                    oninput=${[
+                    oninput=${(_, ev) => [
                         error ? form.batch(Set, Validate) : Set,
-                        ev => ev.target.value,
+                        ev.target.value,
                     ]}
                     value=${value}
                 />

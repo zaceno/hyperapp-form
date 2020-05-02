@@ -29,13 +29,13 @@ export const view = state => html`
                 form.provide(
                     {
                         ...ctx,
-                        SetValues: [
+                        SetValues: (_, newVals) => [
                             ctx.SetValues,
-                            newVals => ({
+                            {
                                 ...newVals,
                                 max: Math.max(newVals.min, newVals.max),
                                 min: Math.min(newVals.min, newVals.max),
-                            }),
+                            },
                         ],
                     },
                     html`
