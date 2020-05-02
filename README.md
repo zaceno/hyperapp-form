@@ -12,7 +12,7 @@ alleviate some of this drudgery for developers using Hyperapp (v2)
 You can simply import the form components as es-modules:
 
 ```js
-import * as form from 'https://unpkg.com/@zxlabs/hyperapp-form'
+import * as form from 'https://unpkg.com/hyperapp-form'
 ```
 
 ### NPM Package
@@ -26,7 +26,7 @@ npm i @zxlabs/hyperapp-form
 and import the form components from the installed package:
 
 ```js
-import * as form from '@zxlabs/hyperapp-form'
+import * as form from 'hyperapp-form'
 ```
 
 > This library has a peer dependency on hyperapp, so remember to also
@@ -37,7 +37,7 @@ import * as form from '@zxlabs/hyperapp-form'
 The main version is implemented as a number of separate es-modules, for the benefit of tree shaking. If you prefer to import a single, minified version, you can:
 
 ```js
-import * as form from 'https://unpkg.com/@zxlabs/hyperapp-form/dist/mini.js'
+import * as form from 'https://unpkg.com/hyperapp-form/dist/mini.js'
 ```
 
 ### IIFE version
@@ -48,7 +48,7 @@ So add a script after the hyperapp script like this:
 
 ```html
 <script src="https://unpkg.com/hyperapp/dist/hyperapp.js"></script>
-<script src="httos://unpkg.com/@zxlabs/hyperapp-form/dist/iife.js"></script>
+<script src="httos://unpkg.com/hyperapp-form/dist/iife.js"></script>
 ```
 
 that will inject an object in the global scope called `hyperappform`, holding all the components described below.
