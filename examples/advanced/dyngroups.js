@@ -46,18 +46,18 @@ const objPurge = (prefix, obj) =>
 
 // -- DEFINITION OF EXPENSE-ROW CONTEXT --
 
-const SetExpenseValue = (ctx, index) => [
+const SetExpenseValue = (ctx, index) => (_, newExpense) => [
     ctx.SetValues,
-    newExpense => ({
+    {
         ...ctx.values,
         expenses: ctx.values.expenses.map((x, i) =>
             i === index ? newExpense : x
         ),
-    }),
+    },
 ]
-const SetExpenseError = (ctx, index) => [
+const SetExpenseError = (ctx, index) => (_, newErrors) => [
     ctx.SetErrors,
-    newErrors => objMerge('expenses.' + index + '.', ctx.errors, newErrors),
+    objMerge('expenses.' + index + '.', ctx.errors, newErrors),
 ]
 
 const AddExpense = ctx => [
@@ -92,11 +92,11 @@ const RemoveExpense = (ctx, index) =>
 
 const getExpenseContext = (ctx, index) => ({
     register: (f, ek = 'expenses.' + index + '.') =>
-        ctx.register((errors, values) =>
+        ctx.register(errors =>
             objMerge(
                 ek,
                 errors,
-                f(objExtract(ek, errors), values.expenses[index])
+                f(objExtract(ek, errors), ctx.values.expenses[index])
             )
         ),
     submitted: ctx.submitted,
