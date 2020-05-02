@@ -2,61 +2,51 @@ import test from 'ava'
 import form from '../src/form.js'
 import init from '../src/init.js'
 import { h } from 'hyperapp'
-import * as actions from '../src/actions.js'
 
-const defaultValues = { foo: 'bar' }
-const defaultErrors = { baz: 'bop' }
-const formState = init(defaultValues, defaultErrors)
-const getFormState = () => {}
-const setFormState = () => {}
-const onsubmit = () => {}
-const getFormContext = () => {
+const resolveAction = (action, state, ...data) => {
+    if (typeof action === 'function')
+        return resolveAction(action(state, ...data), state)
+    if (Array.isArray(action))
+        return resolveAction(action[0], state, ...action.slice(1))
+    return [action, data] // will be: [newState, [...effects]]
+}
+
+const getFormContext = props => {
     let context
-    h(
-        form,
-        {
-            state: formState,
-            getFormState,
-            setFormState,
-            onsubmit,
-        },
-        [c => ((context = c), h('x', {}))]
-    )
+    h(form, props, [c => ((context = c), h('x', {}))])
     return context
 }
 
-test('form provides state', t => {
-    let { values, errors, submitted } = getFormContext()
-    t.deepEqual(values, defaultValues)
-    t.deepEqual(errors, defaultErrors)
-    t.is(submitted, false)
+const formprops = state => ({
+    state: state.form,
+    getFormState: s => s.form,
+    setFormState: (s, f) => ({ ...s, form: f }),
+    onsubmit: s => s,
 })
 
+const testinit = (x, y) => ({ form: init(x, y) })
+
 test('form provides SetValues', t => {
-    let {
-        SetValues: [action, filter],
-    } = getFormContext()
-    t.is(action, actions.SetValues)
-    t.deepEqual(filter({ new: 'value' }), {
-        values: { new: 'value' },
-        getFormState,
-        setFormState,
-    })
+    let state = testinit({ foo: 'bar' })
+    let { SetValues } = getFormContext(formprops(state))
+    let [resultState, effects] = resolveAction(SetValues, state, { baz: 'bop' })
+    let { values } = getFormContext(formprops(resultState))
+    t.deepEqual(values, { baz: 'bop' })
+    t.deepEqual(effects, [])
 })
 
 test('form provides SetErrors', t => {
-    let {
-        SetErrors: [action, filter],
-    } = getFormContext()
-    t.is(action, actions.SetErrors)
-    t.deepEqual(filter({ new: 'error' }), {
-        errors: { new: 'error' },
-        getFormState,
-        setFormState,
+    let state = testinit({ foo: 'bar' }, { err: 'bad' })
+    let { SetErrors } = getFormContext(formprops(state))
+    let [resultState, effects] = resolveAction(SetErrors, state, {
+        more: 'badder',
     })
+    let { errors } = getFormContext(formprops(resultState))
+    t.deepEqual(errors, { more: 'badder' })
+    t.deepEqual(effects, [])
 })
 
 test('form provides validation registry', t => {
-    let { register } = getFormContext()
+    let { register } = getFormContext(testinit())
     t.truthy(register)
 })

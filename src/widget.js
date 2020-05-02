@@ -11,10 +11,10 @@ export default (name, validator, f) => ({
             ...errors,
             [name]: validator(values[name], values),
         }))
-    const Set = [SetValues, x => ({ ...values, [name]: x })]
+    const Set = (_, x) => [SetValues, { ...values, [name]: x }]
     const Validate = validator
-        ? [SetErrors, x => ({ ...errors, [name]: validator(x, values) })]
-        : x => x //noop
+        ? (_, x) => [SetErrors, { ...errors, [name]: validator(x, values) }]
+        : _ => _ //noop
     return f({
         disabled: submitted,
         value: values[name],
