@@ -20,7 +20,7 @@ import * as form from 'https://unpkg.com/hyperapp-form'
 Alternatively, install it as a dependency in your project
 
 ```sh
-npm i @zxlabs/hyperapp-form
+npm i hyperapp-form
 ```
 
 and import the form components from the installed package:
@@ -251,11 +251,11 @@ If the `name` of the checkbox is "foo", then if the form is submitted with the c
 If the form is submitted with multiple checkboxes having the same name, then the values will be listed as an array. For example, consider these:
 
 ```jsx
-<form.checkbox type="checkbox" name="foo" value="a" />
-<form.checkbox type="checkbox" name="foo" value="b" />
-<form.checkbox type="checkbox" name="foo" value="c" />
-<form.checkbox type="checkbox" name="foo" value="d" />
-<form.checkbox type="checkbox" name="foo" value="e" />
+<form.input type="checkbox" name="foo" value="a" />
+<form.input type="checkbox" name="foo" value="b" />
+<form.input type="checkbox" name="foo" value="c" />
+<form.input type="checkbox" name="foo" value="d" />
+<form.input type="checkbox" name="foo" value="e" />
 ```
 
 If the form is submitted with the 'a', 'c' and 'd' boxes checked, the values will have: `{foo: ['a', 'c', 'd']}`
