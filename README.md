@@ -48,7 +48,7 @@ So add a script after the hyperapp script like this:
 
 ```html
 <script src="https://unpkg.com/hyperapp/dist/hyperapp.js"></script>
-<script src="httos://unpkg.com/hyperapp-form/dist/iife.js"></script>
+<script src="https://unpkg.com/hyperapp-form/dist/iife.js"></script>
 ```
 
 that will inject an object in the global scope called `hyperappform`, holding all the components described below.
