@@ -4,12 +4,13 @@
     "description": "utility for forms and form-validation in hyperapp",
     "main": "src/index.js",
     "module": "src/index.js",
+    "type": "module",
+    "unpkg": "dist.js",
     "scripts": {
         "test": "ava",
         "build:demo": "node build-demo-site.js",
-        "build:iief": "rollup src/index.js --external hyperapp -f iife -n hyperappform -g hyperapp:hyperapp |terser -m -c > dist/iife.js",
-        "build:mini": "rollup src/index.js --external hyperapp | terser -m -c > dist/mini.js",
-        "build:dist": "npm run build:iief && npm run build:mini"
+        "build:dist": "rollup src/index.js --no-strict -f es --external hyperapp | terser -m -c --toplevel | sed \"s/hyperapp/http:\\/\\/unpkg.com\\/hyperapp/g\" > dist.js",
+        "build": "npm run build:dist && npm run build:demo"
     },
     "repository": {
         "type": "git",
@@ -28,23 +29,16 @@
     },
     "homepage": "https://github.com/zaceno/hyperapp-form#readme",
     "peerDependencies": {
-        "hyperapp": "2.x"
+        "hyperapp": "^2.0.5"
     },
     "devDependencies": {
         "ava": "^3.7.0",
         "es-module-shims": "^0.4.6",
-        "esm": "^3.2.25",
-        "htm": "^3.0.3",
-        "hyperapp": "2.x",
+        "hyperapp": "^2.0.5",
+        "hyperlit": "^0.3.2",
         "rollup": "^2.7.2",
-        "servor": "^3.2.0",
-        "terser": "^4.6.12",
-        "undom": "^0.4.0"
-    },
-    "ava": {
-        "require": [
-            "esm"
-        ]
+        "servor": "^3.3.1",
+        "terser": "^4.6.12"
     },
     "dependencies": {}
 }

@@ -15,7 +15,7 @@ const resolveAction = (action, state, ...data) => {
 
 const getFormContext = props => {
     let context
-    let node = h(form, props, [c => ((context = c), h('x', {}))])
+    let node = form(props, [c => ((context = c), h('x', {}))])
     return [context, node.props.onsubmit]
 }
 

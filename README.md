@@ -32,27 +32,6 @@ import * as form from 'hyperapp-form'
 > This library has a peer dependency on hyperapp, so remember to also
 > install hyperapp!
 
-### Minified version
-
-The main version is implemented as a number of separate es-modules, for the benefit of tree shaking. If you prefer to import a single, minified version, you can:
-
-```js
-import * as form from 'https://unpkg.com/hyperapp-form/dist/mini.js'
-```
-
-### IIFE version
-
-If you imported hyperapp as a script tag, which adds `hyperapp` to the global scope, my guess is you want to do the same with this library.
-
-So add a script after the hyperapp script like this:
-
-```html
-<script src="https://unpkg.com/hyperapp/dist/hyperapp.js"></script>
-<script src="https://unpkg.com/hyperapp-form/dist/iife.js"></script>
-```
-
-that will inject an object in the global scope called `hyperappform`, holding all the components described below.
-
 ## Basics
 
 ### Initializing

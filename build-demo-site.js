@@ -1,5 +1,8 @@
-const fs = require('fs')
-const path = require('path')
+import { fileURLToPath } from 'url'
+import fs from 'fs'
+import path from 'path'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ORIGINAL = path.join(__dirname, 'demo')
 const SITE_FOLDER = path.join(__dirname, 'demo-standalone')
@@ -40,7 +43,6 @@ const mapScript = (htmlstring, source, altname) => {
 deleteFolderRecursive(SITE_FOLDER)
 copyFolderSync(ORIGINAL, SITE_FOLDER)
 fs.mkdirSync(path.join(SITE_FOLDER, 'lib'))
-
 let htmlString = fs.readFileSync(HTML_FILE, 'utf-8')
 
 htmlString = mapScript(
@@ -55,8 +57,8 @@ htmlString = mapScript(
 )
 htmlString = mapScript(
     htmlString,
-    '/node_modules/htm/mini/index.module.js',
-    'htm.js'
+    '/node_modules/hyperlit/index.js',
+    'hyperlit.js'
 )
 
 copyFolderSync(__dirname + '/src', path.join(SITE_FOLDER, 'lib', 'form'))

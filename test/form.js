@@ -13,6 +13,7 @@ const resolveAction = (action, state, ...data) => {
 
 const getFormContext = props => {
     let context
+    form(props, [c => ((context = c), h('x', {}))])
     h(form, props, [c => ((context = c), h('x', {}))])
     return context
 }
