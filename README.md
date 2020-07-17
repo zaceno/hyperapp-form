@@ -106,7 +106,7 @@ Buttons for submitting forms can also be added
 
 All that we've covered so far, is combined in a live runnable example you can try out (while inspecting the code) here: [https://zaceno.github.io/hyperapp-form/#flow/submitting](https://zaceno.github.io/hyperapp-form/#flow/submitting)
 
-Go there, type "foo" in the input field then click submit. Notice two things:
+Go there, type "bar" in the input field then click submit. Notice two things:
 
 -   After the form was submitted, the input and submit-button became disabled. A form, once submitted, cannot be submitted again. You must initialize the state to render the form editable once more (Use the "Reset" button in the example to do this).
 -   The data submitted was: `{foo: "bar"}`. "bar" is the text you typed, and `foo` is because you typed it in an input with `name="foo"`.
@@ -159,7 +159,7 @@ If any of the validators returned a message, _one_ of those messages will be sho
 
 Validators also run as the user types in fields where there is an error. When the error is corrected, the "error" class is removed, and the error message dissapears.
 
-And even if a form is not submitted, when the user blurs a field containing a bad value, that field (not all) is validated. We validate on blur so as not to unnecessarily annoy users.
+And even if a form is not submitted, when the user blurs a field containing a bad value, that particular field is validated. We validate on blur so as not to unnecessarily annoy users.
 
 The onblur validation only applies to text-style inputs (text, password, email et c). Others like radios, checkboxes, select-dropdowns are validated immediately when the value changes.
 
@@ -272,7 +272,7 @@ To make a dropdown, do as you would with regular html and just replace the `<sel
 </form.select>
 ```
 
-There is no special component for `option` or `optgroup` - just use the regular tags.
+There is no special component for the `<option>` or `<optgroup>` tags - just use the regular html-tags.
 
 You can attach a `validator` to the `form.select` component as well. Like checkboxes and radio-buttons, validation happens immediately on input. Not on blur.
 
@@ -312,8 +312,8 @@ The props that the renderer is called with are:
 
 The secret behind how this library works, is that the `form.form` component provides a _context_ to all the children and grandchildren. That is to say, there is an object of computed values and actions available anywhere in the tree below `form.form`. To define a component which can read the context, instead of returning a virtual-node from your component, return a function which returns the virtual-node. That function will be called with the context as argument.
 
-```jsx
-const MyFormAwareComponent = props => context => <div>...</div>
+```js
+const MyFormAwareComponent = props => context => html`<div>...</div>`
 ```
 
 The context is an object with the following properties:
