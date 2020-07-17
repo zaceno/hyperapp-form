@@ -9,7 +9,7 @@
     "scripts": {
         "test": "ava",
         "build:demo": "node build-demo-site.js",
-        "build:dist": "rollup src/index.js --no-strict -f es --external hyperapp | terser -m -c --toplevel | sed \"s/hyperapp/http:\\/\\/unpkg.com\\/hyperapp/g\" > dist.js",
+        "build:dist": "rollup src/index.js --no-strict -f es --external hyperapp | terser -m -c --toplevel | sed \"s/hyperapp/https:\\/\\/unpkg.com\\/hyperapp/g\" > dist.js",
         "build": "npm run build:dist && npm run build:demo"
     },
     "repository": {
