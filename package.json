@@ -1,6 +1,6 @@
 {
     "name": "hyperapp-form",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "utility for forms and form-validation in hyperapp",
     "main": "src/index.js",
     "module": "src/index.js",
